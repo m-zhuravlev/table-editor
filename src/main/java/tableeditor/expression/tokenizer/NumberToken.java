@@ -1,6 +1,6 @@
 package tableeditor.expression.tokenizer;
 
-public class NumberToken implements Token {
+public class NumberToken implements Token, TerminalToken {
     private String value;
 
     public NumberToken(String value) {

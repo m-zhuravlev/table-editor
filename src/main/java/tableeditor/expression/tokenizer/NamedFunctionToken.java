@@ -1,6 +1,6 @@
 package tableeditor.expression.tokenizer;
 
-public class NamedFunctionToken implements Token{
+public class NamedFunctionToken implements Token, TerminalToken {
     private String name;
 
     public NamedFunctionToken(String name) {

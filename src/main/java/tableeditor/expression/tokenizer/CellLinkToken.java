@@ -1,6 +1,6 @@
 package tableeditor.expression.tokenizer;
 
-public class CellLinkToken implements Token {
+public class CellLinkToken implements Token, TerminalToken {
 
     private String columnName;
     private String rowName;
