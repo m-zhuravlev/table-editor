@@ -1,5 +1,7 @@
 package tableeditor.expression.tokenizer;
 
+import java.math.BigDecimal;
+
 public class OperatorToken implements Token {
     private final OperationEnum instance;
 
@@ -14,5 +16,10 @@ public class OperatorToken implements Token {
 
     public int getPriority() {
         return instance.priority;
+    }
+
+
+    public BigDecimal execute(BigDecimal a, BigDecimal b) {
+        return instance.getFunction().apply(a, b);
     }
 }

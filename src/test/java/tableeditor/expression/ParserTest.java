@@ -38,6 +38,9 @@ public class ParserTest {
         assertEquals(root.getRight().getToken().getValue(), "*");
         assertEquals(root.getRight().getLeft().getToken().getValue(), "4");
         assertEquals(root.getRight().getRight().getToken().getValue(), "5");
+
+        root = Parser.parseTokens(Tokenizer.generateTokens("(6-2)*3"));
+        assertEquals(root.getToken().getValue(), "*");
     }
 
 

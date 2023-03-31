@@ -8,6 +8,9 @@ public class Parser {
     public static TokenNode parseTokens(List<Token> tokens) throws IllegalArgumentException {
         TokenNode cur = new TokenNode();
         Deque<TokenNode> stack = new LinkedList<>();
+        stack.push(cur);
+        cur.setLeft(new TokenNode());
+        cur = cur.getLeft();
         Iterator<Token> it = tokens.iterator();
         while (it.hasNext()) {
             Token token = it.next();
@@ -20,7 +23,7 @@ public class Parser {
             } else if (token instanceof OperatorToken) {
                 cur = parseOperator(cur, stack, token);
             } else if (token instanceof BracketCloseToken) {
-                if (!stack.isEmpty()) cur = stack.pop();
+                cur = stack.pop();
             } else throw new UnsupportedOperationException("Syntax error " + token.getValue());
         }
 

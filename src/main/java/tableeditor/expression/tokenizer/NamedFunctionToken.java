@@ -1,18 +1,25 @@
 package tableeditor.expression.tokenizer;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 public class NamedFunctionToken implements Token, TerminalToken {
-    private final FunctionEnum fun;
+    private final FunctionEnum instance;
 
     public NamedFunctionToken(FunctionEnum fun) {
-        this.fun = fun;
+        this.instance = fun;
     }
 
     @Override
     public String getValue() {
-        return fun.functionName;
+        return instance.functionName;
     }
 
     public int getParamsCount() {
-        return fun.inputParamsCount;
+        return instance.inputParamsCount;
+    }
+
+    public BigDecimal execute(List<BigDecimal> input) {
+        return instance.getFunction().apply(input);
     }
 }

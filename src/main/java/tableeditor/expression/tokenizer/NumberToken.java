@@ -1,14 +1,15 @@
 package tableeditor.expression.tokenizer;
 
-public class NumberToken implements Token, TerminalToken {
-    private String value;
+import java.math.BigDecimal;
 
-    public NumberToken(String value) {
-        this.value = value;
+public record NumberToken(String value) implements Token, TerminalToken {
+
+    public BigDecimal getNumberValue() {
+        return new BigDecimal(value);
     }
 
     @Override
     public String getValue() {
-        return value;
+        return value();
     }
 }
