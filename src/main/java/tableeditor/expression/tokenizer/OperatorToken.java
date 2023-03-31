@@ -1,19 +1,18 @@
 package tableeditor.expression.tokenizer;
 
 public class OperatorToken implements Token {
-    private final String value;
+    private final OperationEnum instance;
 
-    public OperatorToken(String value) {
-        this.value = value;
+    public OperatorToken(OperationEnum instance) {
+        this.instance = instance;
     }
 
     @Override
     public String getValue() {
-        return value;
+        return String.valueOf(instance.charValue);
     }
 
     public int getPriority() {
-        if (value.equals("+") || value.equals("-")) return 1;
-        return 2;
+        return instance.priority;
     }
 }

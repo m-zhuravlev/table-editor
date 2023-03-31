@@ -1,14 +1,18 @@
 package tableeditor.expression.tokenizer;
 
 public class NamedFunctionToken implements Token, TerminalToken {
-    private String name;
+    private final FunctionEnum fun;
 
-    public NamedFunctionToken(String name) {
-        this.name = name;
+    public NamedFunctionToken(FunctionEnum fun) {
+        this.fun = fun;
     }
 
     @Override
     public String getValue() {
-        return name;
+        return fun.functionName;
+    }
+
+    public int getParamsCount() {
+        return fun.inputParamsCount;
     }
 }

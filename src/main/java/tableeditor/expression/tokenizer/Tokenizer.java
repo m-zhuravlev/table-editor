@@ -2,15 +2,10 @@ package tableeditor.expression.tokenizer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Tokenizer {
-
-    private static final Set<Character> bktSet = Set.of('(', ')');
-    private static final Set<Character> operators = Set.of('+', '-', '/', '*', '%');
-    private static final Set<String> funcSet = Set.of("pow");
 
     public static List<Token> generateTokens(String input) {
         Pattern pattern = Pattern.compile("\\d\\.?\\s+(\\d|[a-zA-Z])");
@@ -26,20 +21,20 @@ public class Tokenizer {
             char ch = input.charAt(i);
             if (Character.isDigit(ch)) {
                 i = readNumber(i, input, tokens);
-            } else if (operators.contains(ch)) {
-                tokens.add(new OperatorToken(String.valueOf(ch)));
+            } else if (OperationEnum.isOperation(ch)) {
+                tokens.add(new OperatorToken(OperationEnum.getByChar(ch)));
             } else if (ch == '(') {
-                tokens.add(new BracketToken(String.valueOf(ch)));
+                tokens.add(new BracketOpenToken());
                 brkCount++;
                 if (depth > 0) depth++;
             } else if (ch == ')') {
-                tokens.add(new BracketToken(String.valueOf(ch)));
+                tokens.add(new BracketCloseToken());
                 brkCount--;
                 if (depth > 0) depth--;
             } else if (Character.isAlphabetic(ch)) {
                 i = readFunctionOrCellLink(i, input, tokens);
                 if (input.charAt(i) == '(') {
-                    tokens.add(new BracketToken("("));
+                    tokens.add(new BracketOpenToken());
                     depth++;
                     brkCount++;
                 }
@@ -65,8 +60,9 @@ public class Tokenizer {
         }
         String name = sb.toString();
         if (ch == '(') {
-            if (funcSet.contains(name)) {
-                tokens.add(new NamedFunctionToken(name));
+            FunctionEnum fun = FunctionEnum.getByName(name);
+            if (fun != null) {
+                tokens.add(new NamedFunctionToken(fun));
                 return ind;
             } else throw new IllegalArgumentException("Function '" + name + "()' not found");
         } else {

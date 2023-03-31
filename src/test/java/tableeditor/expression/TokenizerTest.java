@@ -41,13 +41,13 @@ public class TokenizerTest {
     public void typeTest() {
         List<Token> l = Tokenizer.generateTokens("pow(5.3+2, A1)");
         assertTrue(l.get(0) instanceof NamedFunctionToken);
-        assertTrue(l.get(1) instanceof BracketToken);
+        assertTrue(l.get(1) instanceof BracketOpenToken);
         assertTrue(l.get(2) instanceof NumberToken);
         assertTrue(l.get(3) instanceof OperatorToken);
         assertTrue(l.get(4) instanceof NumberToken);
         assertTrue(l.get(5) instanceof CommaToken);
         assertTrue(l.get(6) instanceof CellLinkToken);
-        assertTrue(l.get(7) instanceof BracketToken);
+        assertTrue(l.get(7) instanceof BracketCloseToken);
     }
 
     @Test

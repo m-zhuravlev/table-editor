@@ -1,23 +1,17 @@
 package tableeditor.expression.parser;
 
-import tableeditor.expression.tokenizer.NamedFunctionToken;
-import tableeditor.expression.tokenizer.OperatorToken;
-import tableeditor.expression.tokenizer.TerminalToken;
-import tableeditor.expression.tokenizer.Token;
+import tableeditor.expression.tokenizer.*;
 
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class Parser {
-    public static TokenNode parseTokens(List<Token> tokens) {
+    public static TokenNode parseTokens(List<Token> tokens) throws IllegalArgumentException {
         TokenNode cur = new TokenNode();
         Deque<TokenNode> stack = new LinkedList<>();
         Iterator<Token> it = tokens.iterator();
         while (it.hasNext()) {
             Token token = it.next();
-            if (token.getValue().equals("(")) {
+            if (token instanceof BracketOpenToken) {
                 stack.push(cur);
                 cur.setLeft(new TokenNode());
                 cur = cur.getLeft();
@@ -25,7 +19,7 @@ public class Parser {
                 cur = parseTerminalToken(cur, stack, token, it);
             } else if (token instanceof OperatorToken) {
                 cur = parseOperator(cur, stack, token);
-            } else if (token.getValue().equals(")")) {
+            } else if (token instanceof BracketCloseToken) {
                 if (!stack.isEmpty()) cur = stack.pop();
             } else throw new UnsupportedOperationException("Syntax error " + token.getValue());
         }
@@ -42,7 +36,8 @@ public class Parser {
     private static TokenNode parseTerminalToken(TokenNode cur, Deque<TokenNode> stack, Token token, Iterator<Token> it) {
         cur.setToken(token);
         if (token instanceof NamedFunctionToken) {
-            parseFunctionParams(cur, it);
+            cur.setParams(parseFunctionParams(it));
+            cur.checkParams();
         }
         if (stack.isEmpty()) {
             TokenNode node = new TokenNode();
@@ -54,8 +49,36 @@ public class Parser {
         return cur;
     }
 
-    private static void parseFunctionParams(TokenNode node, Iterator<Token> it) {
-
+    private static List<TokenNode> parseFunctionParams(Iterator<Token> it) {
+        List<TokenNode> params = new ArrayList<>();
+        int brktCount = 0;
+        Token token = it.next();
+        if (token instanceof BracketOpenToken) brktCount++;
+        List<Token> tokenList = new ArrayList<>();
+        while (it.hasNext() && brktCount > 0) {
+            token = it.next();
+            if (token instanceof BracketOpenToken) {
+                brktCount++;
+                tokenList.add(token);
+            } else if (token instanceof BracketCloseToken) {
+                brktCount--;
+                if (brktCount > 0) {
+                    tokenList.add(token);
+                } else if (!tokenList.isEmpty()) {
+                    params.add(parseTokens(tokenList));
+                }
+            } else if (token instanceof CommaToken) {
+                if (brktCount > 1) {
+                    tokenList.add(token);
+                } else {
+                    params.add(parseTokens(tokenList));
+                    tokenList.clear();
+                }
+            } else {
+                tokenList.add(token);
+            }
+        }
+        return params;
     }
 
     private static TokenNode parseOperator(TokenNode cur, Deque<TokenNode> stack, Token token) {
