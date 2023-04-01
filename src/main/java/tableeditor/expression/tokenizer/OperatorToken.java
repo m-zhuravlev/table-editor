@@ -18,6 +18,9 @@ public class OperatorToken implements Token {
         return instance.priority;
     }
 
+    public OperationEnum getInstance() {
+        return instance;
+    }
 
     public BigDecimal execute(BigDecimal a, BigDecimal b) {
         return instance.getFunction().apply(a, b);

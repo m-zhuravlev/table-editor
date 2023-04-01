@@ -30,9 +30,6 @@ public class Parser {
         while (!stack.isEmpty()) {
             cur = stack.pop();
         }
-        while (cur.getToken() == null) {
-            cur = cur.getLeft();
-        }
         return cur;
     }
 

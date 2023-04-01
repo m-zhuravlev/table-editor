@@ -1,6 +1,7 @@
 package tableeditor.expression;
 
 import org.junit.jupiter.api.Test;
+import tableeditor.ui.MyTableModel;
 
 import java.math.BigDecimal;
 
@@ -34,4 +35,39 @@ public class InterpreterTest {
         result = Interpreter.getResult("pow( 2 , pow(2,2) )");
         assertEquals(result.intValue(), 16);
     }
+
+    @Test
+    public void cellLinkTest() {
+        MyTableModel tableModel = new MyTableModel();
+        Interpreter.setTableModel(tableModel);
+        tableModel.setValueAt(2, 1, tableModel.nameToNumber("A"));
+        tableModel.setValueAt(4, 1, tableModel.nameToNumber("B"));
+
+        BigDecimal result = Interpreter.getResult("A1");
+        assertEquals(result.intValue(), 2);
+
+        result = Interpreter.getResult("(A1) + (B1)");
+        assertEquals(result.intValue(), 6);
+
+        result = Interpreter.getResult("((A1 - B1))");
+        assertEquals(result.intValue(), -2);
+
+        result = Interpreter.getResult("A1 * B1");
+        assertEquals(result.intValue(), 8);
+
+        result = Interpreter.getResult("pow(A1,B1)");
+        assertEquals(result.intValue(), 16);
+        result = Interpreter.getResult("pow( A1, ((A1)) + ((B1)) )");
+        assertEquals(result.intValue(), 64);
+    }
+
+    @Test
+    public void unaryTest() {
+        BigDecimal result = Interpreter.getResult("---1");
+        assertEquals(result.intValue(), -1);
+
+        result = Interpreter.getResult("4+-pow(2,2)");
+        assertEquals(result.intValue(), 0);
+    }
+
 }

@@ -61,4 +61,12 @@ public class TokenNode {
         }
 
     }
+
+    public TokenNode shiftEmpty() {
+        TokenNode node = this;
+        while (node.getToken() == null) {
+            node = node.getLeft();
+        }
+        return node;
+    }
 }
