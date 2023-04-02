@@ -1,11 +1,9 @@
 package tableeditor.ui;
 
-import tableeditor.expression.Interpreter;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
@@ -16,9 +14,11 @@ public class MyTable extends JTable {
 
     public static final int ZERO_COLUMN_SIZE = 32;
 
+    private final JTextField topField;
+
     public MyTable(JTextField field) {
+        this.topField = field;
         MyTableModel tableModel = new MyTableModel();
-        Interpreter.setTableModel(tableModel);
 
         DefaultTableColumnModel columnModel = new DefaultTableColumnModel();
         DefaultTableCellRenderer zeroRenderer = new DefaultTableCellRenderer();
@@ -50,47 +50,33 @@ public class MyTable extends JTable {
         this.setRowHeight(20);
         this.setGridColor(Color.LIGHT_GRAY);
         this.setCellSelectionEnabled(true);
-        this.setDefaultEditor(MyTableModel.CellModel.class, new CellModelEditor(field));
+        this.setDefaultEditor(CellModel.class, new CellModelEditor());
 
         this.setColumnSelectionInterval(1, 1);
         this.setRowSelectionInterval(0, 0);
 
         zeroRenderer.setBackground(this.getTableHeader().getBackground());
+
+        columnModel.getSelectionModel().addListSelectionListener(this::selectionChangeHandler);
+        selectionModel.addListSelectionListener((this::selectionChangeHandler));
+
     }
 
-    private static class CellModelEditor extends DefaultCellEditor {
-
-        public CellModelEditor(JTextField topField) {
-            super(new JTextField());
-            JTextField tf = (JTextField) editorComponent;
-            tf.setBorder(new EmptyBorder(0, 0, 0, 0));
-            tf.getDocument().addDocumentListener(new DocumentListener() {
-                @Override
-                public void insertUpdate(DocumentEvent e) {
-                    topField.setText(tf.getText());
-                }
-
-                @Override
-                public void removeUpdate(DocumentEvent e) {
-                    topField.setText(tf.getText());
-                }
-
-                @Override
-                public void changedUpdate(DocumentEvent e) {
-                    topField.setText(tf.getText());
-                }
-            });
-        }
-
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            JTextField tf = (JTextField) super.getTableCellEditorComponent(table, value, isSelected, row, column);
-            if (value instanceof MyTableModel.CellModel cellModel) {
-                tf.setText(cellModel.getText());
+    private void selectionChangeHandler(ListSelectionEvent e) {
+        int col = this.getSelectedColumn();
+        String text = "";
+        if (col > 0) {
+            Object val = this.getValueAt(this.getSelectedRow(), col);
+            if (val != null) {
+                text = val.toString();
             }
-            tf.selectAll();
-            return tf;
         }
+        topField.setText(text);
+    }
 
+    @Override
+    public void tableChanged(TableModelEvent e) {
+        super.tableChanged(e);
     }
 
     private static class MyCellRenderer extends DefaultTableCellRenderer {
@@ -101,11 +87,31 @@ public class MyTable extends JTable {
         }
 
         protected void setValue(Object value) {
-            if (value instanceof MyTableModel.CellModel cellModel && !cellModel.getCalculatedValue().isEmpty()) {
+            if (value instanceof CellModel cellModel && !cellModel.getCalculatedValue().isEmpty()) {
                 setText(cellModel.getCalculatedValue());
             } else {
                 super.setValue(value);
             }
         }
+    }
+
+    private class CellModelEditor extends DefaultCellEditor {
+
+        public CellModelEditor() {
+            super(new JTextField());
+            JTextField tf = (JTextField) editorComponent;
+            tf.setBorder(new EmptyBorder(0, 0, 0, 0));
+            topField.setDocument(tf.getDocument());
+        }
+
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            JTextField tf = (JTextField) super.getTableCellEditorComponent(table, value, isSelected, row, column);
+            if (value instanceof CellModel cellModel) {
+                tf.setText(cellModel.getText());
+            }
+            tf.selectAll();
+            return tf;
+        }
+
     }
 }

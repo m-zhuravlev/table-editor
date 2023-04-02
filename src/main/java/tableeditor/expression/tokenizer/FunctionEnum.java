@@ -5,8 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
+import static tableeditor.expression.Constants.MATH_CONTEXT;
+
 public enum FunctionEnum {
-    POW("pow", 2, BigDecimal.class, (l) -> (l.get(0)).pow(l.get(1).intValue()));
+    POW("pow", 2, BigDecimal.class, (l) -> (l.get(0)).pow(l.get(1).intValue(), MATH_CONTEXT));
 
     public final String functionName;
     public final int inputParamsCount;

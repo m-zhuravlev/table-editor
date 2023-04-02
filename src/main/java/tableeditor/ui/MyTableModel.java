@@ -2,14 +2,22 @@ package tableeditor.ui;
 
 import tableeditor.expression.Interpreter;
 
+import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
-import java.math.BigDecimal;
 
 public class MyTableModel extends AbstractTableModel {
     public static final int ROW_COUNT = 52;
     public static final int COLUMN_COUNT = 27;
 
-    CellModel[][] data = new CellModel[ROW_COUNT][COLUMN_COUNT];
+    private final CellModel[][] data = new CellModel[ROW_COUNT][COLUMN_COUNT];
+
+    public static int nameToNumber(String name) {
+        int result = 0;
+        for (int i = 0; i < name.length(); i++) {
+            result += (name.charAt(i) - 'A' + 1) * (int) Math.pow(26, name.length() - i - 1);
+        }
+        return result;
+    }
 
     @Override
     public int getRowCount() {
@@ -53,15 +61,18 @@ public class MyTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         if (columnIndex > 0) {
-            if (data[rowIndex][columnIndex - 1] == null) {
-                data[rowIndex][columnIndex - 1] = new CellModel();
+            int col = columnIndex - 1;
+            if (data[rowIndex][col] == null) {
+                data[rowIndex][col] = new CellModel(this, rowIndex, col);
             }
             String text = String.valueOf(aValue);
-            CellModel cellModel = data[rowIndex][columnIndex - 1];
-            cellModel.setText(text);
+            CellModel cellModel = data[rowIndex][col];
             if (text.startsWith("=") && text.length() > 1) {
-                BigDecimal result = Interpreter.getResult(text.substring(1));
-                cellModel.setCalculatedValue(result.toString());
+                new CalculateWorker(text, cellModel).execute();
+            } else {
+                cellModel.setCalculatedValue("");
+                cellModel.setText(text);
+                cellModel.fireCellModelChange();
             }
         }
     }
@@ -71,34 +82,34 @@ public class MyTableModel extends AbstractTableModel {
         return getValueAt(rowIndex - 1, columnIndex);
     }
 
-    public int nameToNumber(String name) {
-        return (name.chars().sum() - 'A' + 1) * name.length();
-    }
+    public static class CalculateWorker extends SwingWorker<Object, Object> {
 
-    public static class CellModel {
-        private String text = "";
-        private String calculatedValue = text;
+        private final String text;
+        private final CellModel cellModel;
 
-        public String getText() {
-            return text;
-        }
-
-        public void setText(String text) {
+        public CalculateWorker(String text, CellModel cellModel) {
             this.text = text;
+            this.cellModel = cellModel;
         }
 
         @Override
-        public String toString() {
-            return text;
+        protected Object doInBackground() {
+            String result;
+            try {
+                result = new Interpreter(cellModel).getResult(text.substring(1)).toString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                result = "#ERROR";
+            }
+            cellModel.setCalculatedValue(result);
+            cellModel.setText(text);
+            cellModel.fireCellModelChange();
+            return result;
         }
 
-        public String getCalculatedValue() {
-            return calculatedValue;
-        }
-
-
-        public void setCalculatedValue(String calculatedValue) {
-            this.calculatedValue = calculatedValue;
+        @Override
+        protected void done() {
+            cellModel.getTableModel().fireTableCellUpdated(cellModel.getRow(), cellModel.getCol() + 1);
         }
     }
 }
