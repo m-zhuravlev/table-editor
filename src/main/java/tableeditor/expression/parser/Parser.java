@@ -44,7 +44,10 @@ public class Parser {
             node.setLeft(cur);
             cur = node;
         } else {
-            cur = stack.pop();
+            while (!stack.isEmpty()) {
+                cur = stack.pop();
+                if (cur.getToken() == null || cur.getLeft() != null) break;
+            }
         }
         return cur;
     }

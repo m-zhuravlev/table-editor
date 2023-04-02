@@ -76,6 +76,12 @@ public class InterpreterTest {
 
         result = ipr.getResult("4+-pow(2,2)");
         assertEquals(result.intValue(), 0);
+
+        result = ipr.getResult("---1-+--1");
+        assertEquals(result.intValue(), -2);
+
+        result = ipr.getResult("-1--1--1");
+        assertEquals(result.intValue(), 1);
     }
 
 }

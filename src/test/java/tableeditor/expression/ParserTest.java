@@ -97,4 +97,13 @@ public class ParserTest {
         assertEquals(root.getRight().getParams().get(1).shiftEmpty().getToken().getValue(), "3");
 
     }
+
+    @Test
+    public void unaryOperationTest(){
+        TokenNode root = Parser.parseTokens(Tokenizer.generateTokens("-1-2"));
+        assertEquals(root.getToken().getValue(), "-");
+        assertEquals(root.getRight().getToken().getValue(), "2");
+        assertEquals(root.getLeft().getToken().getValue(), "-");
+        assertEquals(root.getLeft().getRight().getToken().getValue(), "1");
+    }
 }
