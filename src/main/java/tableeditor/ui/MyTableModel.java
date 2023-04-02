@@ -1,8 +1,5 @@
 package tableeditor.ui;
 
-import tableeditor.expression.Interpreter;
-
-import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 
 public class MyTableModel extends AbstractTableModel {
@@ -67,49 +64,13 @@ public class MyTableModel extends AbstractTableModel {
             }
             String text = String.valueOf(aValue);
             CellModel cellModel = data[rowIndex][col];
-            if (text.startsWith("=") && text.length() > 1) {
-                new CalculateWorker(text, cellModel).execute();
-            } else {
-                cellModel.setCalculatedValue("");
-                cellModel.setText(text);
-                cellModel.fireCellModelChange();
-            }
+            cellModel.setText(text);
         }
     }
+
 
     public Object getValueAt(String columnName, int rowIndex) {
         int columnIndex = nameToNumber(columnName);
         return getValueAt(rowIndex - 1, columnIndex);
-    }
-
-    public static class CalculateWorker extends SwingWorker<Object, Object> {
-
-        private final String text;
-        private final CellModel cellModel;
-
-        public CalculateWorker(String text, CellModel cellModel) {
-            this.text = text;
-            this.cellModel = cellModel;
-        }
-
-        @Override
-        protected Object doInBackground() {
-            String result;
-            try {
-                result = new Interpreter(cellModel).getResult(text.substring(1)).toString();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                result = "#ERROR";
-            }
-            cellModel.setCalculatedValue(result);
-            cellModel.setText(text);
-            cellModel.fireCellModelChange();
-            return result;
-        }
-
-        @Override
-        protected void done() {
-            cellModel.getTableModel().fireTableCellUpdated(cellModel.getRow(), cellModel.getCol() + 1);
-        }
     }
 }

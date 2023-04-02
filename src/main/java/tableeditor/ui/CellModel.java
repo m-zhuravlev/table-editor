@@ -1,5 +1,8 @@
 package tableeditor.ui;
 
+import tableeditor.expression.Interpreter;
+
+import javax.swing.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -56,7 +59,9 @@ public class CellModel implements CellModelListener {
 
     @Override
     public void linkedCellChanged() {
-        new MyTableModel.CalculateWorker(text, this).execute();
+        if (text.startsWith("=") && text.length() > 1) {
+            new CalculateWorker().execute();
+        }
     }
 
     public int getRow() {
@@ -65,5 +70,36 @@ public class CellModel implements CellModelListener {
 
     public int getCol() {
         return col;
+    }
+
+    public void calcExpression() {
+        if (text.startsWith("=") && text.length() > 1) {
+            new CalculateWorker().execute();
+        } else {
+            fireCellModelChange();
+        }
+    }
+
+    public class CalculateWorker extends SwingWorker<Object, Object> {
+        @Override
+        protected Object doInBackground() {
+            String result;
+            CellModel cellModel = CellModel.this;
+            try {
+                result = new Interpreter(cellModel).getResult(cellModel.getText().substring(1)).toString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                result = "#ERROR";
+            }
+            cellModel.setCalculatedValue(result);
+            cellModel.setText(text);
+            cellModel.fireCellModelChange();
+            return result;
+        }
+
+        @Override
+        protected void done() {
+            CellModel.this.getTableModel().fireTableCellUpdated(CellModel.this.getRow(), CellModel.this.getCol() + 1);
+        }
     }
 }
