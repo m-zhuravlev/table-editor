@@ -11,7 +11,7 @@ public class CellModel implements CellModelListener {
     private final int row;
     private final int col;
     private String text = "";
-    private String calculatedValue = text;
+    private String calculatedValue = "";
     private Set<CellModelListener> listenerList = null;
 
     public CellModel(MyTableModel tableModel, int row, int col) {
@@ -59,9 +59,7 @@ public class CellModel implements CellModelListener {
 
     @Override
     public void linkedCellChanged() {
-        if (text.startsWith("=") && text.length() > 1) {
-            new CalculateWorker().execute();
-        }
+        calcExpression();
     }
 
     public int getRow() {
@@ -76,6 +74,7 @@ public class CellModel implements CellModelListener {
         if (text.startsWith("=") && text.length() > 1) {
             new CalculateWorker().execute();
         } else {
+            setCalculatedValue("");
             fireCellModelChange();
         }
     }
