@@ -131,14 +131,13 @@ public class CellModel implements CellModelListener {
                 result = "#ERROR";
             }
             cellModel.setCalculatedValue(result);
-            cellModel.setText(text);
             cellModel.fireCellModelChange();
             return result;
         }
 
         @Override
         protected void done() {
-            CellModel.this.getTableModel().fireTableCellUpdated(CellModel.this.getRow(), CellModel.this.getCol() + 1);
+            CellModel.this.getTableModel().fireTableCellUpdated(CellModel.this.getRow(), CellModel.this.getCol()+1);
         }
     }
 }

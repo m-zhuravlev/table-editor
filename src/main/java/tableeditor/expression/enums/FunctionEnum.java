@@ -1,4 +1,4 @@
-package tableeditor.expression.tokenizer;
+package tableeditor.expression.enums;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -8,7 +8,9 @@ import java.util.function.Function;
 import static tableeditor.expression.Constants.MATH_CONTEXT;
 
 public enum FunctionEnum {
-    POW("pow", 2, BigDecimal.class, (l) -> (l.get(0)).pow(l.get(1).intValue(), MATH_CONTEXT));
+    POW("pow", 2, BigDecimal.class, (l) -> l.get(0).pow(l.get(1).intValue(), MATH_CONTEXT)),
+    SQRT("sqrt", 1, BigDecimal.class, (l) -> l.get(0).sqrt(MATH_CONTEXT)),
+    ABS("abs", 1, BigDecimal.class, (l) -> l.get(0).abs(MATH_CONTEXT));
 
     public final String functionName;
     public final int inputParamsCount;

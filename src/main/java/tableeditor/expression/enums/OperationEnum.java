@@ -1,4 +1,4 @@
-package tableeditor.expression.tokenizer;
+package tableeditor.expression.enums;
 
 import java.math.BigDecimal;
 import java.util.Arrays;

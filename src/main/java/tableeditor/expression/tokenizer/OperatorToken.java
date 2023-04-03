@@ -1,5 +1,7 @@
 package tableeditor.expression.tokenizer;
 
+import tableeditor.expression.enums.OperationEnum;
+
 import java.math.BigDecimal;
 
 public class OperatorToken implements Token {

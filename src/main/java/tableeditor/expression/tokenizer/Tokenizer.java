@@ -1,5 +1,7 @@
 package tableeditor.expression.tokenizer;
 
+import tableeditor.expression.enums.FunctionEnum;
+import tableeditor.expression.enums.OperationEnum;
 import tableeditor.expression.exception.ExpressionException;
 
 import java.util.ArrayList;

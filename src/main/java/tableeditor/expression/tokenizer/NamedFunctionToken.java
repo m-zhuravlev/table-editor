@@ -1,5 +1,7 @@
 package tableeditor.expression.tokenizer;
 
+import tableeditor.expression.enums.FunctionEnum;
+
 import java.math.BigDecimal;
 import java.util.List;
 

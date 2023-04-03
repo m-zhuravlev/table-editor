@@ -1,5 +1,6 @@
 package tableeditor.expression;
 
+import tableeditor.expression.enums.OperationEnum;
 import tableeditor.expression.exception.ExpressionException;
 import tableeditor.expression.parser.Parser;
 import tableeditor.expression.parser.TokenNode;
