@@ -23,20 +23,19 @@ public class CellLinkToken implements Token, TerminalToken {
 
     public BigDecimal resolveValue(CellModel cellModel) throws ExpressionException {
         MyTableModel tableModel = cellModel.getTableModel();
-        Object cellValue = tableModel.getValueAt(columnName, Integer.parseInt(rowName));
-        CellModel linkModel;
-        if (cellValue instanceof CellModel) {
-            linkModel = (CellModel) cellValue;
-        } else {
-            tableModel.setValueAt("", Integer.parseInt(rowName) - 1, MyTableModel.nameToNumber(columnName));
-            linkModel = (CellModel) tableModel.getValueAt(columnName, Integer.parseInt(rowName));
-        }
-        if (linkModel == cellModel) throw new ExpressionException("Reflexive link not supported");
+        CellModel linkModel = tableModel.getOrCreateValueAt(columnName, Integer.parseInt(rowName));
+        if (linkModel == cellModel) throw new ExpressionException("Error: Reflexive link");
+        if (cellModel.isContainsListener(linkModel)) throw new ExpressionException("Error: Iterative link");
         linkModel.addListener(cellModel);
+        cellModel.addSubscription(linkModel);
         String value = linkModel.getCalculatedValue();
         if (value.trim().isEmpty()) {
             value = linkModel.getText();
         }
-        return value.trim().isEmpty() ? BigDecimal.ZERO : new BigDecimal(value.trim());
+        try {
+            return value.trim().isEmpty() ? BigDecimal.ZERO : new BigDecimal(value.trim());
+        } catch (NumberFormatException e) {
+            throw new ExpressionException("Error: cast to Number value from cell " + columnName + rowName);
+        }
     }
 }

@@ -71,11 +71,14 @@ public class MyTableModel extends AbstractTableModel {
     }
 
 
-    public Object getValueAt(String columnName, int rowIndex) throws ExpressionException {
+    public CellModel getOrCreateValueAt(String columnName, int rowIndex) throws ExpressionException {
         int columnIndex = nameToNumber(columnName);
-        if (rowIndex < 1 || rowIndex > ROW_COUNT || columnIndex < 0 || columnIndex >= COLUMN_COUNT) {
+        if (rowIndex < 1 || rowIndex > ROW_COUNT || columnIndex < 1 || columnIndex >= COLUMN_COUNT) {
             throw new ExpressionException("Invalid cell link '" + columnName + rowIndex + "'");
         }
-        return getValueAt(rowIndex - 1, columnIndex);
+        Object cur = getValueAt(rowIndex - 1, columnIndex);
+        if (cur instanceof CellModel) return (CellModel) cur;
+        setValueAt("", rowIndex - 1, columnIndex);
+        return (CellModel) getValueAt(rowIndex - 1, columnIndex);
     }
 }

@@ -12,8 +12,9 @@ public class CellModel implements CellModelListener {
     private final int col;
     private String text = "";
     private String calculatedValue = "";
-    private Set<CellModelListener> listenerList = null;
+    private Set<CellModelListener> listeners = null;
     private String errorMessage = "";
+    private Set<CellModelListener> subscriptions = null;
 
     public CellModel(MyTableModel tableModel, int row, int col) {
         this.tableModel = tableModel;
@@ -34,7 +35,7 @@ public class CellModel implements CellModelListener {
     }
 
     public void fireCellModelChange() {
-        if (listenerList != null) listenerList.forEach(CellModelListener::linkedCellChanged);
+        if (listeners != null) listeners.forEach(CellModelListener::linkedCellChanged);
     }
 
     @Override
@@ -51,16 +52,30 @@ public class CellModel implements CellModelListener {
         this.calculatedValue = calculatedValue;
     }
 
+    @Override
     public void addListener(CellModelListener listener) {
-        if (listenerList == null) {
-            listenerList = new HashSet<>();
+        if (listeners == null) {
+            listeners = new HashSet<>();
         }
-        listenerList.add(listener);
+        listeners.add(listener);
     }
 
     @Override
     public void linkedCellChanged() {
         calcExpression();
+    }
+
+    @Override
+    public void addSubscription(CellModelListener listener) {
+        if (subscriptions == null) {
+            subscriptions = new HashSet<>();
+        }
+        subscriptions.add(listener);
+    }
+
+    @Override
+    public void removeListener(CellModelListener listener) {
+        listeners.remove(listener);
     }
 
     public int getRow() {
@@ -89,12 +104,25 @@ public class CellModel implements CellModelListener {
         errorMessage = message;
     }
 
+    public void clearSubscriptions() {
+        if (subscriptions != null) {
+            subscriptions.forEach(cellModel -> cellModel.removeListener(this));
+            subscriptions.clear();
+        }
+    }
+
+    @Override
+    public boolean isContainsListener(CellModelListener listener) {
+        return listeners != null && listeners.contains(listener);
+    }
+
     public class CalculateWorker extends SwingWorker<Object, Object> {
         @Override
         protected Object doInBackground() {
             String result;
             CellModel cellModel = CellModel.this;
             try {
+                cellModel.clearSubscriptions();
                 result = new Interpreter(cellModel).getResult(cellModel.getText().substring(1)).toString();
                 cellModel.setErrorMessage("");
             } catch (Exception e) {
