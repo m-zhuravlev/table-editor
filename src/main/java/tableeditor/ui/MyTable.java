@@ -24,6 +24,7 @@ public class MyTable extends JTable {
     private final JTextField selectionField;
     private final JTextField exprField;
     private final JLabel errorLabel;
+    private final CellModelEditor cellEditor;
 
     public MyTable(JTextField selectionField, JTextField exprField, JLabel errorLabel) {
         this.selectionField = selectionField;
@@ -63,7 +64,8 @@ public class MyTable extends JTable {
         this.setRowHeight(ROW_HEIGHT);
         this.setGridColor(Color.LIGHT_GRAY);
         this.setCellSelectionEnabled(true);
-        this.setDefaultEditor(CellModel.class, new CellModelEditor());
+        cellEditor = new CellModelEditor();
+        this.setDefaultEditor(CellModel.class, cellEditor);
 
         this.setColumnSelectionInterval(1, 1);
         this.setRowSelectionInterval(0, 0);
@@ -92,13 +94,15 @@ public class MyTable extends JTable {
         this.exprField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                fieldEditingFinished();
+                if (!MyTable.this.isEditing()) {
+                    fieldEditingFinished();
+                }
             }
         });
         this.exprField.addKeyListener(new KeyAdapter() {
 
             @Override
-            public void keyTyped(KeyEvent e) {
+            public void keyReleased(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ENTER) {
                     fieldEditingFinished();
                 }
@@ -108,9 +112,13 @@ public class MyTable extends JTable {
     }
 
     private void fieldEditingFinished() {
-        Object value = MyTable.this.getValueAt(getSelectedRow(), getSelectedColumn());
-        if (value instanceof CellModel cellModel) {
-            cellModel.calcExpression();
+        if (MyTable.this.isEditing()) {
+            cellEditor.fireEditingStopped();
+        } else {
+            Object value = MyTable.this.getValueAt(getSelectedRow(), getSelectedColumn());
+            if (value instanceof CellModel cellModel) {
+                cellModel.calcExpression();
+            }
         }
     }
 
@@ -186,6 +194,11 @@ public class MyTable extends JTable {
             tf.setBorder(new EmptyBorder(0, 0, 0, 0));
             exprField.setDocument(tf.getDocument());
             exprField.getDocument().addDocumentListener(new MyDocumentListener());
+        }
+
+        @Override
+        public void fireEditingStopped() {
+            super.fireEditingStopped();
         }
 
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {

@@ -19,28 +19,50 @@ public class TablePane extends JPanel {
         // Top panel
         JTextField selectionField = new JTextField();
         JTextField expressionField = new JTextField();
-        Box topPanel = createTop(selectionField, expressionField);
+        JLabel fxLbl = new JLabel("F(x)");
+        Box topPanel = createTop(selectionField, expressionField, fxLbl);
         add(topPanel, BorderLayout.NORTH);
 
         // Bottom
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.X_AXIS));
         bottomPanel.add(Box.createRigidArea(new Dimension(MyTable.ZERO_COLUMN_SIZE, 14)));
-        JLabel lbl = new JLabel();
-        lbl.setFont(new Font(lbl.getFont().getName(), Font.BOLD, 10));
-        bottomPanel.add(lbl);
+        JLabel lblError = new JLabel();
+        lblError.setFont(new Font(lblError.getFont().getName(), Font.BOLD, 10));
+        bottomPanel.add(lblError);
         add(bottomPanel, BorderLayout.SOUTH);
 
         // Center panel
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.add(Box.createVerticalStrut(2));
-        centerPanel.add(new JScrollPane(new MyTable(selectionField, expressionField, lbl)));
+        MyTable myTable = new MyTable(selectionField, expressionField, lblError);
+        centerPanel.add(new JScrollPane(myTable));
         add(centerPanel, BorderLayout.CENTER);
+
+        JPopupMenu menu = new JPopupMenu();
+        for (FunctionEnum item : FunctionEnum.values()) {
+            menu.add(item.functionName).addActionListener((event) -> {
+                String text = expressionField.getText();
+                if (text.startsWith("=")) {
+                    text += " " + item.functionName + "(";
+                } else {
+                    text = "=" + item.functionName + "(";
+                }
+                expressionField.setText(text);
+                expressionField.requestFocus();
+            });
+        }
+        fxLbl.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                menu.show(fxLbl, fxLbl.getX(), fxLbl.getY() + fxLbl.getHeight());
+            }
+        });
 
     }
 
-    private static Box createTop(JTextField selectionField, JTextField expressionField) {
+    private static Box createTop(JTextField selectionField, JTextField expressionField, final JLabel fxLbl) {
         Box topPanel = Box.createVerticalBox();
         topPanel.add(Box.createVerticalStrut(4));
 
@@ -54,28 +76,8 @@ public class TablePane extends JPanel {
 
         Box hBox = Box.createHorizontalBox();
         hBox.add(Box.createHorizontalStrut(2));
-        JLabel fxLbl = new JLabel("F(x)");
         fxLbl.setFont(new Font(fxLbl.getFont().getName(), Font.BOLD, 12));
         hBox.add(fxLbl);
-
-        JPopupMenu menu = new JPopupMenu();
-        for (FunctionEnum item : FunctionEnum.values()) {
-            menu.add(item.functionName).addActionListener((event) -> {
-                String text = expressionField.getText();
-                if (text.startsWith("=")) {
-                    text += " " + item.functionName + "(";
-                } else {
-                    text = "=" + item.functionName + "(";
-                }
-                expressionField.setText(text);
-            });
-        }
-        fxLbl.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                menu.show(fxLbl, fxLbl.getX(), fxLbl.getY() + fxLbl.getHeight());
-            }
-        });
         hBox.add(Box.createHorizontalStrut(2));
         expressionField.setEditable(true);
         hBox.add(expressionField);
