@@ -1,5 +1,6 @@
 package tableeditor.expression.parser;
 
+import tableeditor.expression.exception.ExpressionException;
 import tableeditor.expression.tokenizer.NamedFunctionToken;
 import tableeditor.expression.tokenizer.Token;
 
@@ -54,17 +55,17 @@ public class TokenNode {
         this.params = params;
     }
 
-    public void checkParams() {
+    public void checkParams() throws ExpressionException {
         if (token instanceof NamedFunctionToken) {
             if (params.size() != ((NamedFunctionToken) token).getParamsCount())
-                throw new IllegalArgumentException("Function %s should have %d input params".formatted(token.getValue(), ((NamedFunctionToken) token).getParamsCount()));
+                throw new ExpressionException("Function %s should have %d input params".formatted(token.getValue(), ((NamedFunctionToken) token).getParamsCount()));
         }
 
     }
 
     public TokenNode shiftEmpty() {
         TokenNode node = this;
-        while (node.getToken() == null) {
+        while (node.getToken() == null && node.getLeft() != null) {
             node = node.getLeft();
         }
         return node;

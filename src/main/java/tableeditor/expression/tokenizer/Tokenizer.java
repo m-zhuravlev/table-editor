@@ -1,5 +1,7 @@
 package tableeditor.expression.tokenizer;
 
+import tableeditor.expression.exception.ExpressionException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -7,11 +9,11 @@ import java.util.regex.Pattern;
 
 public class Tokenizer {
 
-    public static List<Token> generateTokens(String input) {
+    public static List<Token> generateTokens(String input) throws ExpressionException {
         Pattern pattern = Pattern.compile("\\d\\.?\\s+(\\d|[a-zA-Z])");
         Matcher matcher = pattern.matcher(input);
         if (matcher.find()) {
-            throw new IllegalArgumentException("Invalid syntax from " + matcher.start() + " to " + matcher.end());
+            throw new ExpressionException("Invalid syntax from " + matcher.start() + " to " + matcher.end());
         }
         input = input.replaceAll(" ", "");
 
@@ -40,15 +42,15 @@ public class Tokenizer {
                 }
             } else if (ch == ',' && depth > 0) {
                 tokens.add(new CommaToken());
-            } else throw new IllegalArgumentException("Invalid syntax '" + ch + "' at position " + i);
+            } else throw new ExpressionException("Invalid syntax '" + ch + "' at position " + i);
         }
         if (brkCount != 0) {
-            throw new IllegalArgumentException("Bracket count not correct ");
+            throw new ExpressionException("Bracket count not correct ");
         }
         return tokens;
     }
 
-    private static int readFunctionOrCellLink(int ind, String input, List<Token> tokens) {
+    private static int readFunctionOrCellLink(int ind, String input, List<Token> tokens) throws ExpressionException {
         StringBuilder sb = new StringBuilder();
         char ch = input.charAt(ind);
         sb.append(ch);
@@ -64,10 +66,10 @@ public class Tokenizer {
             if (fun != null) {
                 tokens.add(new NamedFunctionToken(fun));
                 return ind;
-            } else throw new IllegalArgumentException("Function '" + name + "()' not found");
+            } else throw new ExpressionException("Function '" + name + "()' not found");
         } else {
             CellLinkToken token = makeCellLinkToken(name);
-            if (token == null) throw new IllegalArgumentException("Invalid syntax '" + name + "' ");
+            if (token == null) throw new ExpressionException("Invalid syntax '" + name + "' ");
             tokens.add(token);
             return ind - 1;
         }

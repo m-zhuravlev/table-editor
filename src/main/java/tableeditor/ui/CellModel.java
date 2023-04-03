@@ -13,6 +13,7 @@ public class CellModel implements CellModelListener {
     private String text = "";
     private String calculatedValue = "";
     private Set<CellModelListener> listenerList = null;
+    private String errorMessage = "";
 
     public CellModel(MyTableModel tableModel, int row, int col) {
         this.tableModel = tableModel;
@@ -75,8 +76,17 @@ public class CellModel implements CellModelListener {
             new CalculateWorker().execute();
         } else {
             setCalculatedValue("");
+            setErrorMessage("");
             fireCellModelChange();
         }
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    private void setErrorMessage(String message) {
+        errorMessage = message;
     }
 
     public class CalculateWorker extends SwingWorker<Object, Object> {
@@ -86,8 +96,10 @@ public class CellModel implements CellModelListener {
             CellModel cellModel = CellModel.this;
             try {
                 result = new Interpreter(cellModel).getResult(cellModel.getText().substring(1)).toString();
+                cellModel.setErrorMessage("");
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                System.err.println(e.getMessage());
+                cellModel.setErrorMessage(e.getMessage());
                 result = "#ERROR";
             }
             cellModel.setCalculatedValue(result);

@@ -1,17 +1,17 @@
 package tableeditor.expression;
 
 import org.junit.jupiter.api.Test;
+import tableeditor.expression.exception.ExpressionException;
 import tableeditor.expression.parser.Parser;
 import tableeditor.expression.parser.TokenNode;
 import tableeditor.expression.tokenizer.Tokenizer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ParserTest {
 
     @Test
-    public void simpleTest() {
+    public void simpleTest() throws ExpressionException {
         TokenNode root = Parser.parseTokens(Tokenizer.generateTokens("1"));
         assertEquals(root.shiftEmpty().getToken().getValue(), "1");
 
@@ -21,9 +21,9 @@ public class ParserTest {
         assertEquals(root.getRight().getToken().getValue(), "2");
 
         root = Parser.parseTokens(Tokenizer.generateTokens("(((1+2)))"));
-        assertEquals(root.getToken(), null);
-        assertEquals(root.getLeft().getToken(), null);
-        assertEquals(root.getLeft().getLeft().getToken(), null);
+        assertNull(root.getToken());
+        assertNull(root.getLeft().getToken());
+        assertNull(root.getLeft().getLeft().getToken());
         TokenNode localRoot = root.getLeft().getLeft().getLeft();
         assertEquals(localRoot.getToken().getValue(), "+");
         assertEquals(localRoot.getLeft().getToken().getValue(), "1");
@@ -49,9 +49,9 @@ public class ParserTest {
 
 
     @Test
-    public void cellLinkTest() {
+    public void cellLinkTest() throws ExpressionException {
         TokenNode root = Parser.parseTokens(Tokenizer.generateTokens("A1"));
-        assertEquals(root.getToken(), null);
+        assertNull(root.getToken());
         assertEquals(root.getLeft().getToken().getValue(), "A1");
 
         root = Parser.parseTokens(Tokenizer.generateTokens("1+A2"));
@@ -61,19 +61,19 @@ public class ParserTest {
 
         root = Parser.parseTokens(Tokenizer.generateTokens("(1)+(A2)"));
         assertEquals(root.getToken().getValue(), "+");
-        assertEquals(root.getLeft().getToken(), null);
+        assertNull(root.getLeft().getToken());
         assertEquals(root.getLeft().getLeft().getToken().getValue(), "1");
-        assertEquals(root.getRight().getToken(), null);
+        assertNull(root.getRight().getToken());
         assertEquals(root.getRight().getLeft().getToken().getValue(), "A2");
 
     }
 
     @Test
-    public void namedFuncTest() {
+    public void namedFuncTest() throws ExpressionException {
         TokenNode root;
-        assertThrows(IllegalArgumentException.class, () -> Parser.parseTokens(Tokenizer.generateTokens("pow()")));
-        assertThrows(IllegalArgumentException.class, () -> Parser.parseTokens(Tokenizer.generateTokens("pow(1)")));
-        assertThrows(IllegalArgumentException.class, () -> Parser.parseTokens(Tokenizer.generateTokens("pow(1,2,3)")));
+        assertThrows(ExpressionException.class, () -> Parser.parseTokens(Tokenizer.generateTokens("pow()")));
+        assertThrows(ExpressionException.class, () -> Parser.parseTokens(Tokenizer.generateTokens("pow(1)")));
+        assertThrows(ExpressionException.class, () -> Parser.parseTokens(Tokenizer.generateTokens("pow(1,2,3)")));
 
         root = Parser.parseTokens(Tokenizer.generateTokens("pow(2,3)")).shiftEmpty();
         assertEquals(root.getToken().getValue(), "pow");
@@ -99,7 +99,7 @@ public class ParserTest {
     }
 
     @Test
-    public void unaryOperationTest(){
+    public void unaryOperationTest() throws ExpressionException {
         TokenNode root = Parser.parseTokens(Tokenizer.generateTokens("-1-2"));
         assertEquals(root.getToken().getValue(), "-");
         assertEquals(root.getRight().getToken().getValue(), "2");

@@ -2,10 +2,7 @@ package tableeditor.ui;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellEditor;
@@ -21,11 +18,15 @@ import java.util.stream.IntStream;
 public class MyTable extends JTable {
 
     public static final int ZERO_COLUMN_SIZE = 32;
+    public static final int COLUMN_PREFERRED_WIDTH = 80;
+    public static final int ROW_HEIGHT = 20;
 
     private final JTextField topField;
+    private final JLabel errorLabel;
 
-    public MyTable(JTextField field) {
+    public MyTable(JTextField field, JLabel errorLabel) {
         this.topField = field;
+        this.errorLabel = errorLabel;
         MyTableModel tableModel = new MyTableModel();
 
         DefaultTableColumnModel columnModel = new DefaultTableColumnModel();
@@ -40,7 +41,7 @@ public class MyTable extends JTable {
         MyCellRenderer cellRenderer = new MyCellRenderer();
         IntStream.range(1, tableModel.getColumnCount()).forEach(i -> {
             TableColumn column = new TableColumn(i);
-            column.setPreferredWidth(80);
+            column.setPreferredWidth(COLUMN_PREFERRED_WIDTH);
             column.setCellRenderer(cellRenderer);
             column.setHeaderValue(tableModel.getColumnName(i));
             columnModel.addColumn(column);
@@ -55,7 +56,7 @@ public class MyTable extends JTable {
 
         this.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         this.getTableHeader().setReorderingAllowed(false);
-        this.setRowHeight(20);
+        this.setRowHeight(ROW_HEIGHT);
         this.setGridColor(Color.LIGHT_GRAY);
         this.setCellSelectionEnabled(true);
         this.setDefaultEditor(CellModel.class, new CellModelEditor());
@@ -112,12 +113,12 @@ public class MyTable extends JTable {
     }
 
     private void selectionChangeHandler(ListSelectionEvent e) {
-        int col = this.getSelectedColumn();
         String text = "";
-        if (col > 0) {
-            Object val = this.getValueAt(this.getSelectedRow(), col);
-            if (val != null) {
-                text = val.toString();
+        if (getSelectedColumn() > 0) {
+            Object val = getValueAt(getSelectedRow(), getSelectedColumn());
+            if (val instanceof CellModel cellModel) {
+                text = cellModel.getText();
+                errorLabel.setText(cellModel.getErrorMessage());
             }
         }
         topField.setText(text);
@@ -134,6 +135,19 @@ public class MyTable extends JTable {
                 cellModel.calcExpression();
             }
             removeEditor();
+        }
+    }
+
+    public void tableChanged(TableModelEvent e) {
+        super.tableChanged(e);
+        if (e.getType() == TableModelEvent.UPDATE) {
+            if (getSelectedRow() >= 0 && getSelectedColumn() > 0 &&
+                    getSelectedRow() == e.getFirstRow() && getSelectedColumn() == e.getColumn()) {
+                Object value = getValueAt(e.getFirstRow(), e.getColumn());
+                if (value instanceof CellModel cellModel) {
+                    errorLabel.setText(cellModel.getErrorMessage());
+                }
+            }
         }
     }
 

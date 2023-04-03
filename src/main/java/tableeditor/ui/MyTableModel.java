@@ -1,10 +1,12 @@
 package tableeditor.ui;
 
+import tableeditor.expression.exception.ExpressionException;
+
 import javax.swing.table.AbstractTableModel;
 
 public class MyTableModel extends AbstractTableModel {
-    public static final int ROW_COUNT = 52;
-    public static final int COLUMN_COUNT = 27;
+    public static final int ROW_COUNT = 100;
+    public static final int COLUMN_COUNT = 100;
 
     private final CellModel[][] data = new CellModel[ROW_COUNT][COLUMN_COUNT];
 
@@ -69,8 +71,11 @@ public class MyTableModel extends AbstractTableModel {
     }
 
 
-    public Object getValueAt(String columnName, int rowIndex) {
+    public Object getValueAt(String columnName, int rowIndex) throws ExpressionException {
         int columnIndex = nameToNumber(columnName);
+        if (rowIndex < 1 || rowIndex > ROW_COUNT || columnIndex < 0 || columnIndex >= COLUMN_COUNT) {
+            throw new ExpressionException("Invalid cell link '" + columnName + rowIndex + "'");
+        }
         return getValueAt(rowIndex - 1, columnIndex);
     }
 }

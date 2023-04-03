@@ -1,11 +1,12 @@
 package tableeditor.expression.parser;
 
+import tableeditor.expression.exception.ExpressionException;
 import tableeditor.expression.tokenizer.*;
 
 import java.util.*;
 
 public class Parser {
-    public static TokenNode parseTokens(List<Token> tokens) throws IllegalArgumentException {
+    public static TokenNode parseTokens(List<Token> tokens) throws ExpressionException {
         TokenNode cur = new TokenNode();
         Deque<TokenNode> stack = new LinkedList<>();
         stack.push(cur);
@@ -24,7 +25,7 @@ public class Parser {
                 cur = parseOperator(cur, stack, token);
             } else if (token instanceof BracketCloseToken) {
                 cur = stack.pop();
-            } else throw new UnsupportedOperationException("Syntax error " + token.getValue());
+            } else throw new ExpressionException("Syntax error " + token.getValue());
         }
 
         while (!stack.isEmpty()) {
@@ -33,7 +34,7 @@ public class Parser {
         return cur;
     }
 
-    private static TokenNode parseTerminalToken(TokenNode cur, Deque<TokenNode> stack, Token token, Iterator<Token> it) {
+    private static TokenNode parseTerminalToken(TokenNode cur, Deque<TokenNode> stack, Token token, Iterator<Token> it) throws ExpressionException {
         cur.setToken(token);
         if (token instanceof NamedFunctionToken) {
             cur.setParams(parseFunctionParams(it));
@@ -52,7 +53,7 @@ public class Parser {
         return cur;
     }
 
-    private static List<TokenNode> parseFunctionParams(Iterator<Token> it) {
+    private static List<TokenNode> parseFunctionParams(Iterator<Token> it) throws ExpressionException {
         List<TokenNode> params = new ArrayList<>();
         int brktCount = 0;
         Token token = it.next();

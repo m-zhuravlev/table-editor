@@ -1,11 +1,13 @@
 package tableeditor.expression;
 
+import tableeditor.expression.exception.ExpressionException;
 import tableeditor.expression.parser.Parser;
 import tableeditor.expression.parser.TokenNode;
 import tableeditor.expression.tokenizer.*;
 import tableeditor.ui.CellModel;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Interpreter {
@@ -16,12 +18,12 @@ public class Interpreter {
         this.cellModel = cellModel;
     }
 
-    public BigDecimal getResult(String inputString) {
+    public BigDecimal getResult(String inputString) throws ExpressionException {
         TokenNode root = Parser.parseTokens(Tokenizer.generateTokens(inputString));
         return evaluate(root);
     }
 
-    private BigDecimal evaluate(TokenNode node) {
+    private BigDecimal evaluate(TokenNode node) throws ExpressionException {
         if (node == null) return null;
         node = node.shiftEmpty();
         if (node.getToken() instanceof NumberToken) {
@@ -31,13 +33,15 @@ public class Interpreter {
         } else if (node.getToken() instanceof OperatorToken) {
             return executeOperation(node);
         } else if (node.getToken() instanceof NamedFunctionToken) {
-            List<BigDecimal> input = node.getParams().stream().map(this::evaluate).toList();
+            List<BigDecimal> input = new ArrayList<>();
+            for (TokenNode tokenNode : node.getParams()) {
+                input.add(evaluate(tokenNode));
+            }
             return ((NamedFunctionToken) node.getToken()).execute(input);
-        }
-        return null;
+        } else throw new ExpressionException("Unknown operation ");
     }
 
-    private BigDecimal executeOperation(TokenNode node) {
+    private BigDecimal executeOperation(TokenNode node) throws ExpressionException {
         OperatorToken token = (OperatorToken) node.getToken();
         if (node.getLeft() == null) {
             if (token.getInstance() == OperationEnum.MINUS) {
@@ -45,7 +49,9 @@ public class Interpreter {
             }
             if (token.getInstance() == OperationEnum.PLUS) {
                 return evaluate(node.getRight());
-            } else throw new UnsupportedOperationException("Unsupported unary operation " + token.getValue());
+            } else throw new ExpressionException("Unsupported unary operation " + token.getValue());
+        } else if (node.getRight() == null || node.getRight().shiftEmpty().getToken() == null) {
+            throw new ExpressionException("Second operand binary operation '" + token.getValue() + "' not defined");
         } else {
             return token.execute(evaluate(node.getLeft()), evaluate(node.getRight()));
         }

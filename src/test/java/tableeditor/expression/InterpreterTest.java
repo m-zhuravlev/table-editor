@@ -1,6 +1,7 @@
 package tableeditor.expression;
 
 import org.junit.jupiter.api.Test;
+import tableeditor.expression.exception.ExpressionException;
 import tableeditor.ui.CellModel;
 import tableeditor.ui.MyTableModel;
 
@@ -11,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class InterpreterTest {
 
     @Test
-    public void simpleTest() {
+    public void simpleTest() throws ExpressionException {
         Interpreter ipr = new Interpreter(new CellModel(new MyTableModel(), 0, 0));
 
         BigDecimal result = ipr.getResult("2+2-1");
@@ -34,7 +35,7 @@ public class InterpreterTest {
     }
 
     @Test
-    public void functionTest() {
+    public void functionTest() throws ExpressionException {
         Interpreter ipr = new Interpreter(new CellModel(new MyTableModel(), 0, 0));
         BigDecimal result = ipr.getResult("(10.3 - pow(2,3))*10");
         assertEquals(result.intValue(), 23);
@@ -44,7 +45,7 @@ public class InterpreterTest {
     }
 
     @Test
-    public void cellLinkTest() {
+    public void cellLinkTest() throws ExpressionException {
         MyTableModel tableModel = new MyTableModel();
         Interpreter ipr = new Interpreter(new CellModel(tableModel, 0, 0));
         tableModel.setValueAt(2, 0, MyTableModel.nameToNumber("A"));
@@ -69,7 +70,7 @@ public class InterpreterTest {
     }
 
     @Test
-    public void unaryTest() {
+    public void unaryTest() throws ExpressionException {
         Interpreter ipr = new Interpreter(new CellModel(new MyTableModel(), 0, 0));
         BigDecimal result = ipr.getResult("---1");
         assertEquals(result.intValue(), -1);
