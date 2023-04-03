@@ -43,7 +43,7 @@ public class MyTableModel extends AbstractTableModel {
         return numberToName(column);
     }
 
-    private String numberToName(int column) {
+    public static String numberToName(int column) {
         StringBuilder result = new StringBuilder();
         column--;
         for (; column >= 0; column = column / 26 - 1) {

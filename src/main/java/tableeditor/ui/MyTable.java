@@ -21,11 +21,13 @@ public class MyTable extends JTable {
     public static final int COLUMN_PREFERRED_WIDTH = 80;
     public static final int ROW_HEIGHT = 20;
 
-    private final JTextField topField;
+    private final JTextField selectionField;
+    private final JTextField exprField;
     private final JLabel errorLabel;
 
-    public MyTable(JTextField field, JLabel errorLabel) {
-        this.topField = field;
+    public MyTable(JTextField selectionField, JTextField exprField, JLabel errorLabel) {
+        this.selectionField = selectionField;
+        this.exprField = exprField;
         this.errorLabel = errorLabel;
         MyTableModel tableModel = new MyTableModel();
 
@@ -46,8 +48,10 @@ public class MyTable extends JTable {
             column.setHeaderValue(tableModel.getColumnName(i));
             columnModel.addColumn(column);
         });
+        columnModel.getSelectionModel().addListSelectionListener(this::selectionChangeHandler);
 
         DefaultListSelectionModel selectionModel = new DefaultListSelectionModel();
+        selectionModel.addListSelectionListener(this::selectionChangeHandler);
         selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         this.setModel(tableModel);
@@ -66,8 +70,6 @@ public class MyTable extends JTable {
 
         zeroRenderer.setBackground(this.getTableHeader().getBackground());
 
-        columnModel.getSelectionModel().addListSelectionListener(this::selectionChangeHandler);
-        selectionModel.addListSelectionListener(this::selectionChangeHandler);
 
         this.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -87,13 +89,13 @@ public class MyTable extends JTable {
             }
         });
 
-        topField.addFocusListener(new FocusAdapter() {
+        this.exprField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
                 fieldEditingFinished();
             }
         });
-        topField.addKeyListener(new KeyAdapter() {
+        this.exprField.addKeyListener(new KeyAdapter() {
 
             @Override
             public void keyTyped(KeyEvent e) {
@@ -114,14 +116,23 @@ public class MyTable extends JTable {
 
     private void selectionChangeHandler(ListSelectionEvent e) {
         String text = "";
-        if (getSelectedColumn() > 0) {
-            Object val = getValueAt(getSelectedRow(), getSelectedColumn());
-            if (val instanceof CellModel cellModel) {
-                text = cellModel.getText();
-                errorLabel.setText(cellModel.getErrorMessage());
+        int col = getSelectedColumn();
+        int row = getSelectedRow();
+        if (col >= 0 && row >= 0) {
+            if (col == 0) {
+                this.getColumnModel().getSelectionModel().setSelectionInterval(1, 1);
+            } else {
+                Object val = getValueAt(row, col);
+                if (val instanceof CellModel cellModel) {
+                    text = cellModel.getText();
+                    errorLabel.setText(cellModel.getErrorMessage());
+                }
+                selectionField.setText(MyTableModel.numberToName(col) + (row + 1));
             }
+        } else {
+            selectionField.setText("");
         }
-        topField.setText(text);
+        exprField.setText(text);
     }
 
     public void editingStopped(ChangeEvent e) {
@@ -173,8 +184,8 @@ public class MyTable extends JTable {
             super(new JTextField());
             JTextField tf = (JTextField) editorComponent;
             tf.setBorder(new EmptyBorder(0, 0, 0, 0));
-            topField.setDocument(tf.getDocument());
-            topField.getDocument().addDocumentListener(new MyDocumentListener());
+            exprField.setDocument(tf.getDocument());
+            exprField.getDocument().addDocumentListener(new MyDocumentListener());
         }
 
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
