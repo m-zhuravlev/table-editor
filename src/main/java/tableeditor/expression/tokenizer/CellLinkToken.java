@@ -2,6 +2,7 @@ package tableeditor.expression.tokenizer;
 
 import tableeditor.expression.exception.ExpressionException;
 import tableeditor.ui.CellModel;
+import tableeditor.ui.CellModelListener;
 import tableeditor.ui.MyTableModel;
 
 import java.math.BigDecimal;
@@ -25,7 +26,7 @@ public class CellLinkToken implements Token, TerminalToken {
         MyTableModel tableModel = cellModel.getTableModel();
         CellModel linkModel = tableModel.getOrCreateValueAt(columnName, Integer.parseInt(rowName));
         if (linkModel == cellModel) throw new ExpressionException("Error: Reflexive link");
-        if (cellModel.isContainsListener(linkModel)) throw new ExpressionException("Error: Iterative link");
+        if (isContainsIterativeLink(cellModel, linkModel)) throw new ExpressionException("Error: Iterative link");
         linkModel.addListener(cellModel);
         cellModel.addSubscription(linkModel);
         String value = linkModel.getCalculatedValue();
@@ -37,5 +38,19 @@ public class CellLinkToken implements Token, TerminalToken {
         } catch (NumberFormatException e) {
             throw new ExpressionException("Error: cast to Number value from cell " + columnName + rowName);
         }
+    }
+
+    public boolean isContainsIterativeLink(CellModelListener cur, CellModelListener link) {
+        if (link.getSubscriptions() != null) {
+            if (link.getSubscriptions().contains(cur)) return true;
+            if (link.getSubscriptions() != null) {
+                for (CellModelListener l : link.getSubscriptions()) {
+                    if (isContainsIterativeLink(cur, l)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

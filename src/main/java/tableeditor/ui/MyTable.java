@@ -72,25 +72,6 @@ public class MyTable extends JTable {
 
         zeroRenderer.setBackground(this.getTableHeader().getBackground());
 
-
-        this.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                int row = MyTable.this.rowAtPoint(evt.getPoint());
-                int col = MyTable.this.columnAtPoint(evt.getPoint());
-                int sRow = MyTable.this.getSelectedRow();
-                int sCol = MyTable.this.getSelectedColumn();
-                if (row >= 0 && col > 0 && (row != sRow || col != sCol)) {
-                    Object value = MyTable.this.getValueAt(sRow, sCol);
-                    if (value instanceof CellModel cellModel) {
-                        if (cellModel.getText().startsWith("=")) {
-                            cellModel.calcExpression();
-                        }
-                    }
-                }
-            }
-        });
-
         this.exprField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
@@ -136,11 +117,11 @@ public class MyTable extends JTable {
                     errorLabel.setText(cellModel.getErrorMessage());
                 }
                 selectionField.setText(MyTableModel.numberToName(col) + (row + 1));
+                exprField.setText(text);
             }
         } else {
             selectionField.setText("");
         }
-        exprField.setText(text);
     }
 
     public void editingStopped(ChangeEvent e) {
@@ -218,7 +199,11 @@ public class MyTable extends JTable {
             try {
                 int row = MyTable.this.getSelectedRow();
                 int col = MyTable.this.getSelectedColumn();
-                MyTable.this.setValueAt(e.getDocument().getText(0, e.getDocument().getLength()), row, col);
+                String text = e.getDocument().getText(0, e.getDocument().getLength());
+                if (MyTable.this.getValueAt(row, col) instanceof CellModel cellModel) {
+                    if (cellModel.getText().equals(text)) return;
+                }
+                MyTable.this.setValueAt(text, row, col);
                 ((MyTableModel) MyTable.this.getModel()).fireTableCellUpdated(row, col);
             } catch (BadLocationException ex) {
                 throw new RuntimeException(ex);

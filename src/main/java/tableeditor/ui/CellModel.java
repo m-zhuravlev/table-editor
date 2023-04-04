@@ -90,6 +90,7 @@ public class CellModel implements CellModelListener {
         if (text.startsWith("=") && text.length() > 1) {
             new CalculateWorker().execute();
         } else {
+            clearSubscriptions();
             setCalculatedValue("");
             setErrorMessage("");
             fireCellModelChange();
@@ -111,9 +112,8 @@ public class CellModel implements CellModelListener {
         }
     }
 
-    @Override
-    public boolean isContainsListener(CellModelListener listener) {
-        return listeners != null && listeners.contains(listener);
+    public Set<CellModelListener> getSubscriptions() {
+        return subscriptions;
     }
 
     public class CalculateWorker extends SwingWorker<Object, Object> {
@@ -137,7 +137,7 @@ public class CellModel implements CellModelListener {
 
         @Override
         protected void done() {
-            CellModel.this.getTableModel().fireTableCellUpdated(CellModel.this.getRow(), CellModel.this.getCol()+1);
+            CellModel.this.getTableModel().fireTableCellUpdated(CellModel.this.getRow(), CellModel.this.getCol() + 1);
         }
     }
 }

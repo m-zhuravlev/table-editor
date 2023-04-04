@@ -1,5 +1,7 @@
 package tableeditor.ui;
 
+import java.util.Set;
+
 public interface CellModelListener {
     void linkedCellChanged();
 
@@ -11,5 +13,7 @@ public interface CellModelListener {
 
     void clearSubscriptions();
 
-    boolean isContainsListener(CellModelListener listener);
+    Set<CellModelListener> getSubscriptions();
+
+
 }
