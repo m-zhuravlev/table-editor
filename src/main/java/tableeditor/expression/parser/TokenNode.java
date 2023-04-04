@@ -58,7 +58,7 @@ public class TokenNode {
     public void checkParams() throws ExpressionException {
         if (token instanceof NamedFunctionToken) {
             if (params.size() != ((NamedFunctionToken) token).getParamsCount())
-                throw new ExpressionException("Function %s should have %d input params".formatted(token.getValue(), ((NamedFunctionToken) token).getParamsCount()));
+                throw new ExpressionException("10: Function %s should have %d input params".formatted(token.getValue(), ((NamedFunctionToken) token).getParamsCount()));
         }
 
     }

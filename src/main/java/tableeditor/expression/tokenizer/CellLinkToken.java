@@ -25,8 +25,8 @@ public class CellLinkToken implements Token, TerminalToken {
     public BigDecimal resolveValue(CellModel cellModel) throws ExpressionException {
         MyTableModel tableModel = cellModel.getTableModel();
         CellModel linkModel = tableModel.getOrCreateValueAt(columnName, Integer.parseInt(rowName));
-        if (linkModel == cellModel) throw new ExpressionException("Error: Reflexive link");
-        if (isContainsIterativeLink(cellModel, linkModel)) throw new ExpressionException("Error: Iterative link");
+        if (linkModel == cellModel) throw new ExpressionException("7: Error. Reflexive link");
+        if (isContainsIterativeLink(cellModel, linkModel)) throw new ExpressionException("8: Error. Iterative link");
         linkModel.addListener(cellModel);
         cellModel.addSubscription(linkModel);
         String value = linkModel.getCalculatedValue();
@@ -36,7 +36,7 @@ public class CellLinkToken implements Token, TerminalToken {
         try {
             return value.trim().isEmpty() ? BigDecimal.ZERO : new BigDecimal(value.trim());
         } catch (NumberFormatException e) {
-            throw new ExpressionException("Error: cast to Number value from cell " + columnName + rowName);
+            throw new ExpressionException("9: Error. cast to Number value from cell " + columnName + rowName);
         }
     }
 

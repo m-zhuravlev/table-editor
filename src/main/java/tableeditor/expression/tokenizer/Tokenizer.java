@@ -15,7 +15,7 @@ public class Tokenizer {
         Pattern pattern = Pattern.compile("\\d\\.?\\s+(\\d|[a-zA-Z])");
         Matcher matcher = pattern.matcher(input);
         if (matcher.find()) {
-            throw new ExpressionException("Invalid syntax from " + matcher.start() + " to " + matcher.end());
+            throw new ExpressionException("1: Invalid syntax from " + matcher.start() + " to " + matcher.end());
         }
         input = input.replaceAll(" ", "");
 
@@ -44,10 +44,10 @@ public class Tokenizer {
                 }
             } else if (ch == ',' && depth > 0) {
                 tokens.add(new CommaToken());
-            } else throw new ExpressionException("Invalid syntax '" + ch + "' at position " + i);
+            } else throw new ExpressionException("2: Invalid syntax character: '" + ch + "' at position " + i);
         }
         if (brkCount != 0) {
-            throw new ExpressionException("Bracket count not correct ");
+            throw new ExpressionException("3: Bracket count not correct ");
         }
         return tokens;
     }
@@ -68,10 +68,10 @@ public class Tokenizer {
             if (fun != null) {
                 tokens.add(new NamedFunctionToken(fun));
                 return ind;
-            } else throw new ExpressionException("Function '" + name + "()' not found");
+            } else throw new ExpressionException("4: Function '" + name + "()' not found");
         } else {
             CellLinkToken token = makeCellLinkToken(name);
-            if (token == null) throw new ExpressionException("Invalid syntax '" + name + "' ");
+            if (token == null) throw new ExpressionException("5: Invalid cell link name '" + name + "' ");
             tokens.add(token);
             return ind - 1;
         }

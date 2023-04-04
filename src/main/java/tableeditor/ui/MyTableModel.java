@@ -74,7 +74,7 @@ public class MyTableModel extends AbstractTableModel {
     public CellModel getOrCreateValueAt(String columnName, int rowIndex) throws ExpressionException {
         int columnIndex = nameToNumber(columnName);
         if (rowIndex < 1 || rowIndex > ROW_COUNT || columnIndex < 1 || columnIndex >= COLUMN_COUNT) {
-            throw new ExpressionException("Invalid cell link '" + columnName + rowIndex + "'");
+            throw new ExpressionException("15: Cell link '" + columnName + rowIndex + "' out of table bound");
         }
         Object cur = getValueAt(rowIndex - 1, columnIndex);
         if (cur instanceof CellModel) return (CellModel) cur;

@@ -39,7 +39,7 @@ public class Interpreter {
                 input.add(evaluate(tokenNode));
             }
             return ((NamedFunctionToken) node.getToken()).execute(input);
-        } else throw new ExpressionException("Unknown operation ");
+        } else throw new ExpressionException("12: Unknown operation ");
     }
 
     private BigDecimal executeOperation(TokenNode node) throws ExpressionException {
@@ -50,9 +50,9 @@ public class Interpreter {
             }
             if (token.getInstance() == OperationEnum.PLUS) {
                 return evaluate(node.getRight());
-            } else throw new ExpressionException("Unsupported unary operation " + token.getValue());
+            } else throw new ExpressionException("13: Unsupported unary operation " + token.getValue());
         } else if (node.getRight() == null || node.getRight().shiftEmpty().getToken() == null) {
-            throw new ExpressionException("Second operand binary operation '" + token.getValue() + "' not defined");
+            throw new ExpressionException("14: Second operand binary operation '" + token.getValue() + "' not defined");
         } else {
             return token.execute(evaluate(node.getLeft()), evaluate(node.getRight()));
         }

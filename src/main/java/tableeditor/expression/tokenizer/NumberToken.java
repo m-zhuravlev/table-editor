@@ -10,7 +10,7 @@ public record NumberToken(String value) implements Token, TerminalToken {
         try {
             return new BigDecimal(value);
         } catch (NumberFormatException e) {
-            throw new ExpressionException("Error: cannot cast to Number value '" + value + "'");
+            throw new ExpressionException("6: Error. cannot cast to Number value '" + value + "'");
         }
     }
 

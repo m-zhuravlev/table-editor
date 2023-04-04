@@ -25,7 +25,7 @@ public class Parser {
                 cur = parseOperator(cur, stack, token);
             } else if (token instanceof BracketCloseToken) {
                 cur = stack.pop();
-            } else throw new ExpressionException("Syntax error " + token.getValue());
+            } else throw new ExpressionException("11: Syntax error token: " + token.getValue());
         }
 
         while (!stack.isEmpty()) {
