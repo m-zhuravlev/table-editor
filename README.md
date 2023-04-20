@@ -42,6 +42,7 @@
 - 13: Unsupported unary operation %s
 - 14: Second operand binary operation '%s' not defined
 - 15: Cell link '%s' out of table bound
+- 16: Incompatible input parameter type for binary operation %s
 
 
 ## Backlog для дальнейшего развития

@@ -1,6 +1,6 @@
 package tableeditor.ui;
 
-import tableeditor.expression.enums.FunctionEnum;
+import tableeditor.expression.dso.DSO;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -41,13 +41,13 @@ public class TablePane extends JPanel {
         add(centerPanel, BorderLayout.CENTER);
 
         JPopupMenu menu = new JPopupMenu();
-        for (FunctionEnum item : FunctionEnum.values()) {
-            menu.add(item.functionName).addActionListener((event) -> {
+        for (String funName : DSO.namedOp.keySet()) {
+            menu.add(funName).addActionListener((event) -> {
                 String text = expressionField.getText();
                 if (text.startsWith("=")) {
-                    text += " " + item.functionName + "(";
+                    text += " " + funName + "(";
                 } else {
-                    text = "=" + item.functionName + "(";
+                    text = "=" + funName + "(";
                 }
                 expressionField.setText(text);
                 expressionField.requestFocus();

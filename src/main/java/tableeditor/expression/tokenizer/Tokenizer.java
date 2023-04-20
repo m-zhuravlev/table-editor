@@ -1,7 +1,7 @@
 package tableeditor.expression.tokenizer;
 
-import tableeditor.expression.enums.FunctionEnum;
-import tableeditor.expression.enums.OperationEnum;
+import tableeditor.expression.dso.DSO;
+import tableeditor.expression.dso.NamedOperation;
 import tableeditor.expression.exception.ExpressionException;
 
 import java.util.ArrayList;
@@ -25,8 +25,10 @@ public class Tokenizer {
             char ch = input.charAt(i);
             if (Character.isDigit(ch)) {
                 i = readNumber(i, input, tokens);
-            } else if (OperationEnum.isOperation(ch)) {
-                tokens.add(new OperatorToken(OperationEnum.getByChar(ch)));
+            } else if (DSO.mathOp.containsKey(String.valueOf(ch))) {
+                tokens.add(new MathOperatorToken(DSO.mathOp.get(String.valueOf(ch))));
+            } else if (DSO.compareOp.keySet().stream().anyMatch(k -> k.startsWith(String.valueOf(ch)))) {
+                i = readCompareOperation(i, input, tokens);
             } else if (ch == '(') {
                 tokens.add(new BracketOpenToken());
                 brkCount++;
@@ -52,6 +54,20 @@ public class Tokenizer {
         return tokens;
     }
 
+    private static int readCompareOperation(int i, String input, List<Token> tokens) throws ExpressionException {
+        StringBuilder sb = new StringBuilder();
+        char ch = input.charAt(i);
+        sb.append(ch);
+        if (input.charAt(i + 1) == '=') {
+            sb.append('=');
+            i++;
+        } else if (ch == '!' || ch == '=') {
+            throw new ExpressionException("Not defined operator '" + ch + "'");
+        }
+        tokens.add(new CompareToken(DSO.compareOp.get(sb.toString())));
+        return i;
+    }
+
     private static int readFunctionOrCellLink(int ind, String input, List<Token> tokens) throws ExpressionException {
         StringBuilder sb = new StringBuilder();
         char ch = input.charAt(ind);
@@ -64,11 +80,10 @@ public class Tokenizer {
         }
         String name = sb.toString();
         if (ch == '(') {
-            FunctionEnum fun = FunctionEnum.getByName(name);
-            if (fun != null) {
-                tokens.add(new NamedFunctionToken(fun));
-                return ind;
-            } else throw new ExpressionException("4: Function '" + name + "()' not found");
+            NamedOperation operation = DSO.namedOp.get(name);
+            if (operation == null) throw new ExpressionException("4: Function '" + name + "()' not found");
+            tokens.add(new NamedFunctionToken(operation));
+            return ind;
         } else {
             CellLinkToken token = makeCellLinkToken(name);
             if (token == null) throw new ExpressionException("5: Invalid cell link name '" + name + "' ");

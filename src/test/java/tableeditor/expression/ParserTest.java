@@ -106,4 +106,24 @@ public class ParserTest {
         assertEquals(root.getLeft().getToken().getValue(), "-");
         assertEquals(root.getLeft().getRight().getToken().getValue(), "1");
     }
+
+    @Test
+    public void compareOperationTest() throws ExpressionException {
+        TokenNode root = Parser.parseTokens(Tokenizer.generateTokens("1>2"));
+        assertEquals(root.getToken().getValue(), ">");
+        assertEquals(root.getLeft().getToken().getValue(), "1");
+        assertEquals(root.getRight().getToken().getValue(), "2");
+
+        root = Parser.parseTokens(Tokenizer.generateTokens("1==2"));
+        assertEquals(root.getToken().getValue(), "==");
+        assertEquals(root.getLeft().getToken().getValue(), "1");
+        assertEquals(root.getRight().getToken().getValue(), "2");
+
+
+        root = Parser.parseTokens(Tokenizer.generateTokens("A1 == B1-2"));
+        assertEquals(root.getToken().getValue(), "==");
+        assertEquals(root.getLeft().getToken().getValue(), "A1");
+        assertEquals(root.getRight().getToken().getValue(), "-");
+
+    }
 }

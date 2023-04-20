@@ -1,27 +1,25 @@
 package tableeditor.expression.tokenizer;
 
-import tableeditor.expression.enums.FunctionEnum;
+import tableeditor.expression.dso.NamedOperation;
 
-import java.math.BigDecimal;
-import java.util.List;
+public class NamedFunctionToken implements Token, TerminalToken, OperationToken<NamedOperation> {
+    private final NamedOperation operation;
 
-public class NamedFunctionToken implements Token, TerminalToken {
-    private final FunctionEnum instance;
-
-    public NamedFunctionToken(FunctionEnum fun) {
-        this.instance = fun;
+    public NamedFunctionToken(NamedOperation op) {
+        this.operation = op;
     }
 
     @Override
     public String getValue() {
-        return instance.functionName;
+        return operation.getName();
     }
 
     public int getParamsCount() {
-        return instance.inputParamsCount;
+        return operation.inputParams().size();
     }
 
-    public BigDecimal execute(List<BigDecimal> input) {
-        return instance.getFunction().apply(input);
+    @Override
+    public NamedOperation getOperation() {
+        return operation;
     }
 }
