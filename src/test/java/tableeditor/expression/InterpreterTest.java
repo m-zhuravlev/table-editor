@@ -15,32 +15,32 @@ public class InterpreterTest {
     public void simpleTest() throws ExpressionException {
         Interpreter ipr = new Interpreter(new CellModel(new MyTableModel(), 0, 0));
 
-        BigDecimal result = ipr.getResult("2+2-1");
+        BigDecimal result = (BigDecimal) ipr.getResult("2+2-1");
         assertEquals(result.intValue(), 3);
 
-        result = ipr.getResult("6-2*3");
+        result = (BigDecimal) ipr.getResult("6-2*3");
         assertEquals(result.intValue(), 0);
 
-        result = ipr.getResult("(6-2)*3");
+        result = (BigDecimal) ipr.getResult("(6-2)*3");
         assertEquals(result.intValue(), 12);
 
-        result = ipr.getResult("1+5/2");
+        result = (BigDecimal) ipr.getResult("1+5/2");
         assertEquals(result.doubleValue(), 3.5);
 
-        result = ipr.getResult("8%3*2%4");
+        result = (BigDecimal) ipr.getResult("8%3*2%4");
         assertEquals(result.intValue(), 0);
 
-        result = ipr.getResult("1/3");
+        result = (BigDecimal) ipr.getResult("1/3");
         assertEquals(result, new BigDecimal("1").divide(new BigDecimal("3"), Constants.MATH_CONTEXT));
     }
 
     @Test
     public void functionTest() throws ExpressionException {
         Interpreter ipr = new Interpreter(new CellModel(new MyTableModel(), 0, 0));
-        BigDecimal result = ipr.getResult("(10.3 - pow(2,3))*10");
+        BigDecimal result = (BigDecimal) ipr.getResult("(10.3 - pow(2,3))*10");
         assertEquals(result.intValue(), 23);
 
-        result = ipr.getResult("pow( 2 , pow(2,2) )");
+        result = (BigDecimal) ipr.getResult("pow( 2 , pow(2,2) )");
         assertEquals(result.intValue(), 16);
     }
 
@@ -51,38 +51,65 @@ public class InterpreterTest {
         tableModel.setValueAt(2, 0, MyTableModel.nameToNumber("A"));
         tableModel.setValueAt(4, 0, MyTableModel.nameToNumber("B"));
 
-        BigDecimal result = ipr.getResult("A1");
+        BigDecimal result = (BigDecimal) ipr.getResult("A1");
         assertEquals(result.intValue(), 2);
 
-        result = ipr.getResult("(A1) + (B1)");
+        result = (BigDecimal) ipr.getResult("(A1) + (B1)");
         assertEquals(result.intValue(), 6);
 
-        result = ipr.getResult("((A1 - B1))");
+        result = (BigDecimal) ipr.getResult("((A1 - B1))");
         assertEquals(result.intValue(), -2);
 
-        result = ipr.getResult("A1 * B1");
+        result = (BigDecimal) ipr.getResult("A1 * B1");
         assertEquals(result.intValue(), 8);
 
-        result = ipr.getResult("pow(A1,B1)");
+        result = (BigDecimal) ipr.getResult("pow(A1,B1)");
         assertEquals(result.intValue(), 16);
-        result = ipr.getResult("pow( A1, ((A1)) + ((B1)) )");
+        result = (BigDecimal) ipr.getResult("pow( A1, ((A1)) + ((B1)) )");
         assertEquals(result.intValue(), 64);
+
+
+        Boolean bRes = (Boolean) ipr.getResult("A1 > B1");
+        assertEquals(bRes,false);
+
+        bRes = (Boolean) ipr.getResult("A1 + 2  == B1");
+        assertEquals(bRes,true);
+
+        bRes = (Boolean) ipr.getResult("A1 == B1 -2");
+        assertEquals(bRes,true);
     }
 
     @Test
     public void unaryTest() throws ExpressionException {
         Interpreter ipr = new Interpreter(new CellModel(new MyTableModel(), 0, 0));
-        BigDecimal result = ipr.getResult("---1");
+        BigDecimal result = (BigDecimal) ipr.getResult("---1");
         assertEquals(result.intValue(), -1);
 
-        result = ipr.getResult("4+-pow(2,2)");
+        result = (BigDecimal) ipr.getResult("4+-pow(2,2)");
         assertEquals(result.intValue(), 0);
 
-        result = ipr.getResult("---1-+--1");
+        result = (BigDecimal) ipr.getResult("---1-+--1");
         assertEquals(result.intValue(), -2);
 
-        result = ipr.getResult("-1--1--1");
+        result = (BigDecimal) ipr.getResult("-1--1--1");
         assertEquals(result.intValue(), 1);
+    }
+
+    @Test
+    public void compareTset() throws ExpressionException {
+        Interpreter ipr = new Interpreter(new CellModel(new MyTableModel(), 0, 0));
+
+        Boolean result = (Boolean) ipr.getResult("2!=1");
+        assertEquals(result, true);
+
+        result = (Boolean) ipr.getResult("2 == 1");
+        assertEquals(result, false);
+
+        result = (Boolean) ipr.getResult("2 >= 1");
+        assertEquals(result, true);
+
+        result = (Boolean) ipr.getResult("2 > 1");
+        assertEquals(result, true);
     }
 
 }

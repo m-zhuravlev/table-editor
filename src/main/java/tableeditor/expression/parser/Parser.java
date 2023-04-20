@@ -21,7 +21,7 @@ public class Parser {
                 cur = cur.getLeft();
             } else if (token instanceof TerminalToken) {
                 cur = parseTerminalToken(cur, stack, token, it);
-            } else if (token instanceof OperatorToken) {
+            } else if (token instanceof OperationToken) {
                 cur = parseOperator(cur, stack, token);
             } else if (token instanceof BracketCloseToken) {
                 cur = stack.pop();
@@ -86,9 +86,9 @@ public class Parser {
     }
 
     private static TokenNode parseOperator(TokenNode cur, Deque<TokenNode> stack, Token token) {
-        if (cur.getToken() instanceof OperatorToken) {
+        if (cur.getToken() instanceof OperationToken) {
             TokenNode node = new TokenNode(token);
-            if (((OperatorToken) cur.getToken()).getPriority() < ((OperatorToken) token).getPriority()) {
+            if (((OperationToken<?>) cur.getToken()).getPriority() < ((OperationToken<?>) token).getPriority()) {
                 node.setLeft(cur.getRight());
                 cur.setRight(node);
                 stack.push(cur);
